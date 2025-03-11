@@ -1,0 +1,3 @@
+EXAMENES_ID,DESCRIPCION,MATERIA_ID,ALUMNO_ID,MAESTRO_ID,CALIFICACION
+1,examen_primer_parcial,1,1,1,8
+2,examen_segundo_parcial,1,1,1,10
