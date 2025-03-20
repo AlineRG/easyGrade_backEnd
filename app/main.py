@@ -25,19 +25,29 @@ Base = sqlalchemy.orm.declarative_base()
 
 class User(Base):
     __tablename__ = "USER"
-    id = Column(Integer, primary_key=True)
-    username = Column(String(30), unique=True, nullable=False)
-    email = Column(String(30), unique=True, nullable=False)
-    password = Column(String(50), nullable=False)
+    USER_ID = Column(Integer, primary_key=True)
+    USERNAME = Column(String(30), unique=True, nullable=False)
+    EMAIL = Column(String(30), unique=True, nullable=False)
+    PASSWORD = Column(String(50), nullable=False)
 
 class Contacto(Base):
     __tablename__ = "CONTACTO"
-    id = Column(Integer, primary_key=True)
-    telefono = Column(String(30), unique=True, nullable=False)
-    direccion = Column(String(30), unique=True, nullable=False)
-    correo_electronico = Column(String(30), unique=True, nullable=False)
-    username = Column(String(30), unique=True, nullable=False)
-    password = Column(String(50), nullable=False)
+    CONTACTO_ID = Column(Integer, primary_key=True)
+    USER_ID = Column(Integer, nullable=False)
+    LADA_PAIS = Column(Integer, nullable=False)
+    LADA_LOCAL = Column(Integer, nullable=False)
+    TELEFONO = Column(String(10), nullable=False)
+    TIPO_TELEFONO = Column(String(10), nullable=False)
+    NUM_EXTERIOR = Column(String(10), nullable=False)
+    NUM_INTERIOR = Column(String(10), nullable=False)
+    CALLE = Column(String(20), nullable=False)
+    COLONIA = Column(String(30), nullable=False)
+    CIUDAD = Column(String(20), nullable=False)
+    ENTIDAD = Column(String(20), nullable=False)
+    PAIS = Column(String(20), nullable=False)
+    CODIGO_POSTAL = Column(String(10), nullable=False)
+    NOMBRE_S = Column(String(30), nullable=False)
+    APELLIDO_S = Column(String(30), unique=True, nullable=False)
 
 # Create tables
 Base.metadata.create_all(bind=engine)
@@ -52,16 +62,37 @@ def get_db():
 
 # Pydantic model for adding data
 class AddUser(BaseModel):
-    username: str
-    email: str
-    password: str
+    USER_ID: int
+    USERNAME: str
+    EMAIL: str
+    PASSWORD: str
+
+# Pydantic model for updating contact info
+class UpdateContact(BaseModel):
+    CONTACTO_ID : int
+    USER_ID : int
+    LADA_PAIS : int
+    LADA_LOCAL : int
+    TELEFONO : str
+    TIPO_TELEFONO : str
+    NUM_EXTERIOR : str
+    NUM_INTERIOR : str
+    CALLE : str
+    COLONIA : str
+    CIUDAD : str
+    ENTIDAD : str
+    PAIS : str
+    CODIGO_POSTAL : str
+    NOMBRE_S : str
+    APELLIDO_S : str
+
 
 # Pydantic model for adding data
 class GetUser(BaseModel):
-    id: int
-    username: str
-    email: str
-    password: str
+    USER_ID : int
+    USERNAME : str
+    EMAIL: str
+    PASSWORD: str
 
 
 @app.get("/")
@@ -77,10 +108,19 @@ async def create_item(user: AddUser, db: Session = Depends(get_db)):
     db.refresh(db_user)
     return db_user
 
+# API endpoint to update contacts
+@app.post("/updateContact", response_model=GetUser)
+async def create_item(contact: UpdateContact, db: Session = Depends(get_db)):
+    db_contacto = Contacto(**contact.dict())
+    db.add(db_contacto)
+    db.commit()
+    db.refresh(db_contacto)
+    return db_contacto
+
 # API endpoint to read a user by ID
-@app.get("/users/{user_id}", response_model=GetUser)
-async def read_item(user_id: int, db: Session = Depends(get_db)):
-    db_user = db.query(User).filter(User.id == user_id).first()
+@app.get("/users/{USER_ID}", response_model=GetUser)
+async def read_item(USER_ID: int, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.USER_ID == USER_ID).first()
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return db_user
