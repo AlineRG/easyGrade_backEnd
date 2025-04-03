@@ -4,6 +4,9 @@ import sqlalchemy
 from sqlalchemy.orm import sessionmaker, Session
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import Body
+from typing import Optional
+
 
 
 app = FastAPI()
@@ -62,7 +65,7 @@ def get_db():
 
 # Pydantic model for adding data
 class AddUser(BaseModel):
-    USER_ID: int
+    USER_ID: Optional[int] = None 
     USERNAME: str
     EMAIL: str
     PASSWORD: str
@@ -124,6 +127,43 @@ async def read_item(USER_ID: int, db: Session = Depends(get_db)):
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return db_user
+
+
+@app.post("/login")
+def login(email: str = Body(...), password: str = Body(...), db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.EMAIL == email, User.PASSWORD == password).first()
+    if not user:
+        raise HTTPException(status_code=401, detail="Correo o contraseña incorrectos")
+    return {
+        "USER_ID": user.USER_ID,
+        "USERNAME": user.USERNAME,
+        "EMAIL": user.EMAIL,
+        "PASSWORD": user.PASSWORD
+    }
+
+@app.post("/updateUser")
+def update_user(user: AddUser, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.USER_ID == user.USER_ID).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    db_user.USERNAME = user.USERNAME
+    db_user.EMAIL = user.EMAIL
+    db_user.PASSWORD = user.PASSWORD
+
+    db.commit()
+    db.refresh(db_user)
+
+    return {
+        "USER_ID": db_user.USER_ID,
+        "USERNAME": db_user.USERNAME,
+        "EMAIL": db_user.EMAIL,
+        "PASSWORD": db_user.PASSWORD
+    }
+
+@app.post("/updateUser")
+def update_user(user: AddUser, db: Session = Depends(get_db)):
+    print(">> DATOS RECIBIDOS:", user.dict())  # 👈 VERIFICA que llegue USER_ID
 
 
 if __name__ == "__main__":
