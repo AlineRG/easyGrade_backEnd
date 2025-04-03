@@ -112,7 +112,7 @@ async def create_item(user: AddUser, db: Session = Depends(get_db)):
     return db_user
 
 # API endpoint to update contacts
-@app.post("/updateContact", response_model=GetUser)
+@app.post("/updateContact", response_model=UpdateContact)
 async def create_item(contact: UpdateContact, db: Session = Depends(get_db)):
     db_contacto = Contacto(**contact.dict())
     db.add(db_contacto)
