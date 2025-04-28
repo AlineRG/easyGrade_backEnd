@@ -35,7 +35,7 @@ class User(Base):
 
 class Contacto(Base):
     __tablename__ = "CONTACTO"
-    CONTACTO_ID = Column(Integer, primary_key=True)
+    CONTACTO_ID = Column(Integer, primary_key=True, autoincrement=True)
     USER_ID = Column(Integer, nullable=False)
     LADA_PAIS = Column(Integer, nullable=False)
     LADA_LOCAL = Column(Integer, nullable=False)
@@ -70,23 +70,22 @@ class AddUser(BaseModel):
     PASSWORD: str
 
 # Pydantic model for updating contact info
-# class UpdateContact(BaseModel):
-#     CONTACTO_ID : int
-#     USER_ID : int
-#     LADA_PAIS : int
-#     LADA_LOCAL : int
-#     TELEFONO : str
-#     TIPO_TELEFONO : str
-#     NUM_EXTERIOR : str
-#     NUM_INTERIOR : str
-#     CALLE : str
-#     COLONIA : str
-#     CIUDAD : str
-#     ENTIDAD : str
-#     PAIS : str
-#     CODIGO_POSTAL : str
-#     NOMBRE_S : str
-#     APELLIDO_S : str
+class UpdateContact(BaseModel):
+    USER_ID : int
+    LADA_PAIS : int
+    LADA_LOCAL : int
+    TELEFONO : str
+    TIPO_TELEFONO : str
+    NUM_EXTERIOR : str
+    NUM_INTERIOR : str
+    CALLE : str
+    COLONIA : str
+    CIUDAD : str
+    ENTIDAD : str
+    PAIS : str
+    CODIGO_POSTAL : str
+    NOMBRE_S : str
+    APELLIDO_S : str
 
 
 # Pydantic model for adding data
@@ -111,13 +110,13 @@ async def create_item(user: AddUser, db: Session = Depends(get_db)):
     return db_user
 
 # API endpoint to update contacts
-# @app.post("/updateContact", response_model=UpdateContact)
-# async def create_item(contact: UpdateContact, db: Session = Depends(get_db)):
-#     db_contacto = Contacto(**contact.dict())
-#     db.add(db_contacto)
-#     db.commit()
-#     db.refresh(db_contacto)
-#     return db_contacto
+@app.post("/updateContact", response_model=UpdateContact)
+async def create_item(contact: UpdateContact, db: Session = Depends(get_db)):
+    db_contacto = Contacto(**contact.dict())
+    db.add(db_contacto)
+    db.commit()
+    db.refresh(db_contacto)
+    return db_contacto
 
 # API endpoint to read a user by ID
 @app.get("/users/{USER_ID}", response_model=GetUser)
