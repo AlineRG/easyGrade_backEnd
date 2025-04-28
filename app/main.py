@@ -139,25 +139,25 @@ def login(email: str = Body(...), password: str = Body(...), db: Session = Depen
         "PASSWORD": user.PASSWORD
     }
 
-# @app.post("/updateUser")
-# def update_user(user: AddUser, db: Session = Depends(get_db)):
-#     db_user = db.query(User).filter(User.USER_ID == user.USER_ID).first()
-#     if not db_user:
-#         raise HTTPException(status_code=404, detail="Usuario no encontrado")
+@app.post("/updateUser")
+def update_user(user: AddUser, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.USER_ID == user.USER_ID).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
-#     db_user.USERNAME = user.USERNAME
-#     db_user.EMAIL = user.EMAIL
-#     db_user.PASSWORD = user.PASSWORD
+    db_user.USERNAME = user.USERNAME
+    db_user.EMAIL = user.EMAIL
+    db_user.PASSWORD = user.PASSWORD
 
-#     db.commit()
-#     db.refresh(db_user)
+    db.commit()
+    db.refresh(db_user)
 
-#     return {
-#         "USER_ID": db_user.USER_ID,
-#         "USERNAME": db_user.USERNAME,
-#         "EMAIL": db_user.EMAIL,
-#         "PASSWORD": db_user.PASSWORD
-#     }
+    return {
+        "USER_ID": db_user.USER_ID,
+        "USERNAME": db_user.USERNAME,
+        "EMAIL": db_user.EMAIL,
+        "PASSWORD": db_user.PASSWORD
+    }
 
 # @app.post("/updateUser")
 # def update_user(user: AddUser, db: Session = Depends(get_db)):
