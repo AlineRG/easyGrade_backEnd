@@ -28,7 +28,7 @@ Base = sqlalchemy.orm.declarative_base()
 
 class User(Base):
     __tablename__ = "USER"
-    USER_ID = Column(Integer, primary_key=True)
+    USER_ID = Column(Integer, primary_key=True, autoincrement=True)
     USERNAME = Column(String(30), unique=True, nullable=False)
     EMAIL = Column(String(30), unique=True, nullable=False)
     PASSWORD = Column(String(50), nullable=False)
@@ -65,29 +65,28 @@ def get_db():
 
 # Pydantic model for adding data
 class AddUser(BaseModel):
-    USER_ID: Optional[int] = None 
     USERNAME: str
     EMAIL: str
     PASSWORD: str
 
 # Pydantic model for updating contact info
-class UpdateContact(BaseModel):
-    CONTACTO_ID : int
-    USER_ID : int
-    LADA_PAIS : int
-    LADA_LOCAL : int
-    TELEFONO : str
-    TIPO_TELEFONO : str
-    NUM_EXTERIOR : str
-    NUM_INTERIOR : str
-    CALLE : str
-    COLONIA : str
-    CIUDAD : str
-    ENTIDAD : str
-    PAIS : str
-    CODIGO_POSTAL : str
-    NOMBRE_S : str
-    APELLIDO_S : str
+# class UpdateContact(BaseModel):
+#     CONTACTO_ID : int
+#     USER_ID : int
+#     LADA_PAIS : int
+#     LADA_LOCAL : int
+#     TELEFONO : str
+#     TIPO_TELEFONO : str
+#     NUM_EXTERIOR : str
+#     NUM_INTERIOR : str
+#     CALLE : str
+#     COLONIA : str
+#     CIUDAD : str
+#     ENTIDAD : str
+#     PAIS : str
+#     CODIGO_POSTAL : str
+#     NOMBRE_S : str
+#     APELLIDO_S : str
 
 
 # Pydantic model for adding data
@@ -103,7 +102,7 @@ def index():
     return {"data": "Hello world!"}
 
 # API endpoint to create a user
-@app.post("/addUser", response_model=GetUser)
+@app.post("/addUser", response_model=AddUser)
 async def create_item(user: AddUser, db: Session = Depends(get_db)):
     db_user = User(**user.dict())
     db.add(db_user)
@@ -112,13 +111,13 @@ async def create_item(user: AddUser, db: Session = Depends(get_db)):
     return db_user
 
 # API endpoint to update contacts
-@app.post("/updateContact", response_model=UpdateContact)
-async def create_item(contact: UpdateContact, db: Session = Depends(get_db)):
-    db_contacto = Contacto(**contact.dict())
-    db.add(db_contacto)
-    db.commit()
-    db.refresh(db_contacto)
-    return db_contacto
+# @app.post("/updateContact", response_model=UpdateContact)
+# async def create_item(contact: UpdateContact, db: Session = Depends(get_db)):
+#     db_contacto = Contacto(**contact.dict())
+#     db.add(db_contacto)
+#     db.commit()
+#     db.refresh(db_contacto)
+#     return db_contacto
 
 # API endpoint to read a user by ID
 @app.get("/users/{USER_ID}", response_model=GetUser)
@@ -129,41 +128,41 @@ async def read_item(USER_ID: int, db: Session = Depends(get_db)):
     return db_user
 
 
-@app.post("/login")
-def login(email: str = Body(...), password: str = Body(...), db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.EMAIL == email, User.PASSWORD == password).first()
-    if not user:
-        raise HTTPException(status_code=401, detail="Correo o contraseña incorrectos")
-    return {
-        "USER_ID": user.USER_ID,
-        "USERNAME": user.USERNAME,
-        "EMAIL": user.EMAIL,
-        "PASSWORD": user.PASSWORD
-    }
+# @app.post("/login")
+# def login(email: str = Body(...), password: str = Body(...), db: Session = Depends(get_db)):
+#     user = db.query(User).filter(User.EMAIL == email, User.PASSWORD == password).first()
+#     if not user:
+#         raise HTTPException(status_code=401, detail="Correo o contraseña incorrectos")
+#     return {
+#         "USER_ID": user.USER_ID,
+#         "USERNAME": user.USERNAME,
+#         "EMAIL": user.EMAIL,
+#         "PASSWORD": user.PASSWORD
+#     }
 
-@app.post("/updateUser")
-def update_user(user: AddUser, db: Session = Depends(get_db)):
-    db_user = db.query(User).filter(User.USER_ID == user.USER_ID).first()
-    if not db_user:
-        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+# @app.post("/updateUser")
+# def update_user(user: AddUser, db: Session = Depends(get_db)):
+#     db_user = db.query(User).filter(User.USER_ID == user.USER_ID).first()
+#     if not db_user:
+#         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
-    db_user.USERNAME = user.USERNAME
-    db_user.EMAIL = user.EMAIL
-    db_user.PASSWORD = user.PASSWORD
+#     db_user.USERNAME = user.USERNAME
+#     db_user.EMAIL = user.EMAIL
+#     db_user.PASSWORD = user.PASSWORD
 
-    db.commit()
-    db.refresh(db_user)
+#     db.commit()
+#     db.refresh(db_user)
 
-    return {
-        "USER_ID": db_user.USER_ID,
-        "USERNAME": db_user.USERNAME,
-        "EMAIL": db_user.EMAIL,
-        "PASSWORD": db_user.PASSWORD
-    }
+#     return {
+#         "USER_ID": db_user.USER_ID,
+#         "USERNAME": db_user.USERNAME,
+#         "EMAIL": db_user.EMAIL,
+#         "PASSWORD": db_user.PASSWORD
+#     }
 
-@app.post("/updateUser")
-def update_user(user: AddUser, db: Session = Depends(get_db)):
-    print(">> DATOS RECIBIDOS:", user.dict())  # 👈 VERIFICA que llegue USER_ID
+# @app.post("/updateUser")
+# def update_user(user: AddUser, db: Session = Depends(get_db)):
+#     print(">> DATOS RECIBIDOS:", user.dict())  # 👈 VERIFICA que llegue USER_ID
 
 
 if __name__ == "__main__":
