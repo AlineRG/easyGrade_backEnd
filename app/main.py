@@ -127,17 +127,17 @@ async def read_item(USER_ID: int, db: Session = Depends(get_db)):
     return db_user
 
 
-# @app.post("/login")
-# def login(email: str = Body(...), password: str = Body(...), db: Session = Depends(get_db)):
-#     user = db.query(User).filter(User.EMAIL == email, User.PASSWORD == password).first()
-#     if not user:
-#         raise HTTPException(status_code=401, detail="Correo o contraseña incorrectos")
-#     return {
-#         "USER_ID": user.USER_ID,
-#         "USERNAME": user.USERNAME,
-#         "EMAIL": user.EMAIL,
-#         "PASSWORD": user.PASSWORD
-#     }
+@app.post("/login")
+def login(email: str = Body(...), password: str = Body(...), db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.EMAIL == email, User.PASSWORD == password).first()
+    if not user:
+        raise HTTPException(status_code=401, detail="Correo o contraseña incorrectos")
+    return {
+        "USER_ID": user.USER_ID,
+        "USERNAME": user.USERNAME,
+        "EMAIL": user.EMAIL,
+        "PASSWORD": user.PASSWORD
+    }
 
 # @app.post("/updateUser")
 # def update_user(user: AddUser, db: Session = Depends(get_db)):
