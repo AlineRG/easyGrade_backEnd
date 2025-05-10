@@ -8,7 +8,6 @@ from fastapi import Body
 from typing import Optional
 
 
-
 app = FastAPI()
 
 app.add_middleware(
@@ -16,7 +15,7 @@ app.add_middleware(
     allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"]
+    allow_headers=["*"],
 )
 
 # Database setup
@@ -32,6 +31,7 @@ class User(Base):
     USERNAME = Column(String(30), unique=True, nullable=False)
     EMAIL = Column(String(30), unique=True, nullable=False)
     PASSWORD = Column(String(50), nullable=False)
+
 
 class Contacto(Base):
     __tablename__ = "CONTACTO"
@@ -52,8 +52,10 @@ class Contacto(Base):
     NOMBRE_S = Column(String(30), nullable=False)
     APELLIDO_S = Column(String(30), unique=True, nullable=False)
 
+
 # Create tables
 Base.metadata.create_all(bind=engine)
+
 
 # Dependency to get the database session
 def get_db():
@@ -63,35 +65,37 @@ def get_db():
     finally:
         db.close()
 
+
 # Pydantic model for adding data
 class AddUser(BaseModel):
     USERNAME: str
     EMAIL: str
     PASSWORD: str
 
+
 # Pydantic model for updating contact info
 class UpdateContact(BaseModel):
-    USER_ID : int
-    LADA_PAIS : int
-    LADA_LOCAL : int
-    TELEFONO : str
-    TIPO_TELEFONO : str
-    NUM_EXTERIOR : str
-    NUM_INTERIOR : str
-    CALLE : str
-    COLONIA : str
-    CIUDAD : str
-    ENTIDAD : str
-    PAIS : str
-    CODIGO_POSTAL : str
-    NOMBRE_S : str
-    APELLIDO_S : str
+    USER_ID: int
+    LADA_PAIS: int
+    LADA_LOCAL: int
+    TELEFONO: str
+    TIPO_TELEFONO: str
+    NUM_EXTERIOR: str
+    NUM_INTERIOR: str
+    CALLE: str
+    COLONIA: str
+    CIUDAD: str
+    ENTIDAD: str
+    PAIS: str
+    CODIGO_POSTAL: str
+    NOMBRE_S: str
+    APELLIDO_S: str
 
 
 # Pydantic model for adding data
 class GetUser(BaseModel):
-    USER_ID : int
-    USERNAME : str
+    USER_ID: int
+    USERNAME: str
     EMAIL: str
     PASSWORD: str
 
@@ -99,6 +103,7 @@ class GetUser(BaseModel):
 @app.get("/")
 def index():
     return {"data": "Hello world!"}
+
 
 # API endpoint to create a user
 @app.post("/addUser", response_model=AddUser)
@@ -109,6 +114,7 @@ async def create_item(user: AddUser, db: Session = Depends(get_db)):
     db.refresh(db_user)
     return db_user
 
+
 # API endpoint to update contacts
 @app.post("/updateContact", response_model=UpdateContact)
 async def create_item(contact: UpdateContact, db: Session = Depends(get_db)):
@@ -117,6 +123,7 @@ async def create_item(contact: UpdateContact, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_contacto)
     return db_contacto
+
 
 # API endpoint to read a user by ID
 @app.get("/users/{USER_ID}", response_model=GetUser)
@@ -128,7 +135,9 @@ async def read_item(USER_ID: int, db: Session = Depends(get_db)):
 
 
 @app.post("/login")
-def login(email: str = Body(...), password: str = Body(...), db: Session = Depends(get_db)):
+def login(
+    email: str = Body(...), password: str = Body(...), db: Session = Depends(get_db)
+):
     user = db.query(User).filter(User.EMAIL == email, User.PASSWORD == password).first()
     if not user:
         raise HTTPException(status_code=401, detail="Correo o contraseña incorrectos")
@@ -136,8 +145,9 @@ def login(email: str = Body(...), password: str = Body(...), db: Session = Depen
         "USER_ID": user.USER_ID,
         "USERNAME": user.USERNAME,
         "EMAIL": user.EMAIL,
-        "PASSWORD": user.PASSWORD
+        "PASSWORD": user.PASSWORD,
     }
+
 
 @app.post("/updateUser")
 def update_user(user: AddUser, db: Session = Depends(get_db)):
@@ -156,12 +166,16 @@ def update_user(user: AddUser, db: Session = Depends(get_db)):
         "USER_ID": db_user.USER_ID,
         "USERNAME": db_user.USERNAME,
         "EMAIL": db_user.EMAIL,
-        "PASSWORD": db_user.PASSWORD
+        "PASSWORD": db_user.PASSWORD,
     }
 
-# @app.post("/updateUser")
-# def update_user(user: AddUser, db: Session = Depends(get_db)):
-#     print(">> DATOS RECIBIDOS:", user.dict())  # 👈 VERIFICA que llegue USER_ID
+
+@app.get("/contacto/{user_id}")
+def get_contacto_by_user_id(user_id: int, db: Session = Depends(get_db)):
+    contacto = db.query(Contacto).filter(Contacto.USER_ID == user_id).first()
+    if not contacto:
+        raise HTTPException(status_code=404, detail="Contacto no encontrado")
+    return contacto
 
 
 if __name__ == "__main__":
