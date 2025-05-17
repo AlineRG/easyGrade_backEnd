@@ -36,7 +36,7 @@ class User(Base):
 class Contacto(Base):
     __tablename__ = "CONTACTO"
     CONTACTO_ID = Column(Integer, primary_key=True, autoincrement=True)
-    USER_ID = Column(Integer, nullable=False)
+    USER_ID = Column(Integer, unique=True, nullable=False)
     LADA_PAIS = Column(Integer, nullable=False)
     LADA_LOCAL = Column(Integer, nullable=False)
     TELEFONO = Column(String(10), nullable=False)
@@ -50,7 +50,7 @@ class Contacto(Base):
     PAIS = Column(String(20), nullable=False)
     CODIGO_POSTAL = Column(String(10), nullable=False)
     NOMBRE_S = Column(String(30), nullable=False)
-    APELLIDO_S = Column(String(30), unique=True, nullable=False)
+    APELLIDO_S = Column(String(30), nullable=False)
 
 
 # Create tables
@@ -116,14 +116,24 @@ async def create_item(user: AddUser, db: Session = Depends(get_db)):
 
 
 # API endpoint to update contacts
-@app.post("/updateContact", response_model=UpdateContact)
+@app.put("/updateContact", response_model=UpdateContact)
 async def create_item(contact: UpdateContact, db: Session = Depends(get_db)):
-    db_contacto = Contacto(**contact.dict())
-    db.add(db_contacto)
-    db.commit()
-    db.refresh(db_contacto)
-    return db_contacto
+    user_id = contact.USER_ID
+    db_user = db.query(Contacto).filter(Contacto.USER_ID == user_id).first()
 
+    if not db_user: # Contact information has never been added
+        db_contacto = Contacto(**contact.dict())
+        db.add(db_contacto)
+        db.commit()
+        db.refresh(db_contacto)
+        return db_contacto
+    elif db_user: # USER_ID is found in Contacto
+        for field, value in contact.dict().items():
+            setattr(db_user, field, value)
+        db.commit()
+        db.refresh(db_user)
+        return db_user
+    
 
 # API endpoint to read a user by ID
 @app.get("/users/{USER_ID}", response_model=GetUser)
