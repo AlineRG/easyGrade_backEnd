@@ -121,19 +121,19 @@ async def create_item(contact: UpdateContact, db: Session = Depends(get_db)):
     user_id = contact.USER_ID
     db_user = db.query(Contacto).filter(Contacto.USER_ID == user_id).first()
 
-    if not db_user: # Contact information has never been added
+    if not db_user:  # Contact information has never been added
         db_contacto = Contacto(**contact.dict())
         db.add(db_contacto)
         db.commit()
         db.refresh(db_contacto)
         return db_contacto
-    elif db_user: # USER_ID is found in Contacto
+    elif db_user:  # USER_ID is found in Contacto
         for field, value in contact.dict().items():
             setattr(db_user, field, value)
         db.commit()
         db.refresh(db_user)
         return db_user
-    
+
 
 # API endpoint to read a user by ID
 @app.get("/users/{USER_ID}", response_model=GetUser)
@@ -159,7 +159,7 @@ def login(
     }
 
 
-@app.post("/updateUser")
+@app.put("/updateUser")
 def update_user(user: AddUser, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.USER_ID == user.USER_ID).first()
     if not db_user:
