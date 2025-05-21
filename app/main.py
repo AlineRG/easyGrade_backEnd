@@ -72,6 +72,11 @@ class AddUser(BaseModel):
     EMAIL: str
     PASSWORD: str
 
+class UpdateUser(BaseModel):
+    USER_ID: int
+    USERNAME: str
+    EMAIL: str
+    PASSWORD: str
 
 # Pydantic model for updating contact info
 class UpdateContact(BaseModel):
@@ -160,11 +165,12 @@ def login(
 
 
 @app.put("/updateUser")
-def update_user(user: AddUser, db: Session = Depends(get_db)):
+def update_user(user: UpdateUser, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.USER_ID == user.USER_ID).first()
     if not db_user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
-
+    
+    db_user.USER_ID = user.USER_ID
     db_user.USERNAME = user.USERNAME
     db_user.EMAIL = user.EMAIL
     db_user.PASSWORD = user.PASSWORD
