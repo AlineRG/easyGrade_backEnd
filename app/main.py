@@ -53,6 +53,14 @@ class Contacto(Base):
     APELLIDO_S = Column(String(30), nullable=False)
 
 
+class Materia(Base):
+    __tablename__ = "MATERIAS"
+    MATERIA_ID = Column(Integer, primary_key=True, unique=True, autoincrement=True)
+    # USER_ID = Column(Integer, nullable=False)
+    NOMBRE = Column(String(100), nullable=False)
+    NIVEL = Column(String(50), nullable=False)
+
+
 # Create tables
 Base.metadata.create_all(bind=engine)
 
@@ -72,11 +80,13 @@ class AddUser(BaseModel):
     EMAIL: str
     PASSWORD: str
 
+
 class UpdateUser(BaseModel):
     USER_ID: int
     USERNAME: str
     EMAIL: str
     PASSWORD: str
+
 
 # Pydantic model for updating contact info
 class UpdateContact(BaseModel):
@@ -140,6 +150,16 @@ async def create_item(contact: UpdateContact, db: Session = Depends(get_db)):
         return db_user
 
 
+class MateriaCreate(BaseModel):
+    NOMBRE: str
+    NIVEL: str
+
+
+class MateriaOut(BaseModel):
+    NOMBRE: str
+    NIVEL: str
+
+
 # API endpoint to read a user by ID
 @app.get("/users/{USER_ID}", response_model=GetUser)
 async def read_item(USER_ID: int, db: Session = Depends(get_db)):
@@ -169,7 +189,7 @@ def update_user(user: UpdateUser, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.USER_ID == user.USER_ID).first()
     if not db_user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
-    
+
     db_user.USER_ID = user.USER_ID
     db_user.USERNAME = user.USERNAME
     db_user.EMAIL = user.EMAIL
@@ -192,6 +212,21 @@ def get_contacto_by_user_id(user_id: int, db: Session = Depends(get_db)):
     if not contacto:
         raise HTTPException(status_code=404, detail="Contacto no encontrado")
     return contacto
+
+
+@app.get("/materias/{user_id}", response_model=list[MateriaOut])
+def get_materias(user_id: int, db: Session = Depends(get_db)):
+    materias = db.query(Materia).filter(Materia.USER_ID == user_id).all()
+    return materias
+
+
+@app.post("/agregarMateria", response_model=MateriaOut)
+def agregar_materia(materia: MateriaCreate, db: Session = Depends(get_db)):
+    db_materia = Materia(**materia.dict())
+    db.add(db_materia)
+    db.commit()
+    db.refresh(db_materia)
+    return db_materia
 
 
 if __name__ == "__main__":
