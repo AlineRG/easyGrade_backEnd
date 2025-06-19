@@ -56,7 +56,6 @@ class Contacto(Base):
 class Materia(Base):
     __tablename__ = "MATERIAS"
     MATERIA_ID = Column(Integer, primary_key=True, unique=True, autoincrement=True)
-    # USER_ID = Column(Integer, nullable=False)
     NOMBRE = Column(String(100), nullable=False)
     NIVEL = Column(String(50), nullable=False)
 
@@ -113,6 +112,11 @@ class GetUser(BaseModel):
     USERNAME: str
     EMAIL: str
     PASSWORD: str
+
+
+class MateriaUpdate(BaseModel):
+    NOMBRE: str
+    NIVEL: str
 
 
 @app.get("/")
@@ -226,6 +230,23 @@ def agregar_materia(materia: MateriaCreate, db: Session = Depends(get_db)):
     db.add(db_materia)
     db.commit()
     db.refresh(db_materia)
+    return db_materia
+
+
+@app.put("/editarMateria/{materia_id}", response_model=MateriaOut)
+def editar_materia(
+    materia_id: int, materia: MateriaUpdate, db: Session = Depends(get_db)
+):
+    db_materia = db.query(Materia).filter(Materia.MATERIA_ID == materia_id).first()
+    if not db_materia:
+        raise HTTPException(status_code=404, detail="Materia no encontrada")
+
+    db_materia.NOMBRE = materia.NOMBRE
+    db_materia.NIVEL = materia.NIVEL
+
+    db.commit()
+    db.refresh(db_materia)
+
     return db_materia
 
 
