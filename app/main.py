@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException
-from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy import create_engine, Column, Integer, String, and_
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker, Session
 from pydantic import BaseModel
@@ -246,6 +246,13 @@ def get_materias(user_id: int, db: Session = Depends(get_db)):
 
 @app.post("/agregarMateria", response_model=MateriaOut)
 def agregar_materia(materia: MateriaCreate, db: Session = Depends(get_db)):
+    existing = db.query(Materia).filter(
+        and_(Materia.NOMBRE == materia.NOMBRE, Materia.NIVEL == materia.NIVEL)
+    ).first()
+
+    if existing:
+        raise HTTPException(status_code=400, detail="Esa NOMBRE de materia con ese NIBEL ya se encuentran en la base de datos.")
+    
     db_materia = Materia(**materia.dict())
     db.add(db_materia)
     db.commit()
