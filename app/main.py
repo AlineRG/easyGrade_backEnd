@@ -251,7 +251,7 @@ def agregar_materia(materia: MateriaCreate, db: Session = Depends(get_db)):
     ).first()
 
     if existing:
-        raise HTTPException(status_code=400, detail="Esa NOMBRE de materia con ese NIBEL ya se encuentran en la base de datos.")
+        raise HTTPException(status_code=400, detail="Esa NOMBRE de materia con ese NIVEL ya se encuentran en la base de datos.")
     
     db_materia = Materia(**materia.dict())
     db.add(db_materia)
