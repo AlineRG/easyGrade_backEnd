@@ -1,3 +1,4 @@
 instance/*.db*
 venv/
 app/__pycache__
+app/routers/__pycache__
