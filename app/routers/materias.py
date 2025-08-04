@@ -35,6 +35,11 @@ class MateriaOut(BaseModel):
     class Config:
         orm_mode = True
 
+@materiasRouter.get("/todasMaterias", response_model=list[MateriaOut])
+def get_all_materias(db: Session = Depends(get_db)):
+    materias = db.query(Materia).all()
+    return materias
+
 @materiasRouter.get("/materias/{user_id}", response_model=list[MateriaOut])
 def get_materias(user_id: int, db: Session = Depends(get_db)):
     materias = db.query(Materia).filter(Materia.USER_ID == user_id).all()
