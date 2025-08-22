@@ -46,8 +46,8 @@ def get_materias(user_id: int, db: Session = Depends(get_db)):
     return materias
 
 
-@materiasRouter.post("/agregarMateria", response_model=MateriaOut)
-def agregar_materia(materia: MateriaCreate, db: Session = Depends(get_db)):
+@materiasRouter.post("/registrarMateria", response_model=MateriaOut)
+def registrar_materia(materia: MateriaCreate, db: Session = Depends(get_db)):
     existing = db.query(Materia).filter(
         and_(Materia.NOMBRE == materia.NOMBRE, Materia.NIVEL == materia.NIVEL)
     ).first()
